@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "screenshotstorage.h"
+
 #include <QMainWindow>
 #include <QTimer>
 #include <QGraphicsScene>
@@ -23,11 +25,15 @@ public:
     ~MainWindow();
 public:
 
+private:
+    void setScreenScene();
+    void saveToDb();
+
 
 private slots:
     void buttonClicked(bool checked);
     void makeScreenshot();
-    void setScreenScene();
+    void processScreenshot();
 
 private:
     using Timer = std::unique_ptr<QTimer>;
@@ -36,6 +42,6 @@ private:
     Timer mTimer;
     QGraphicsScene *mScene;
     QPixmap mImage;
-
+    ScreenshotStorage mStorage;
 };
 #endif // MAINWINDOW_H

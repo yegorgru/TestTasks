@@ -11,6 +11,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(Qt5 REQUIRED COMPONENTS Core Quick Sql)
 
 set(PROJECT_SOURCES
         main.cpp
@@ -38,11 +39,12 @@ else()
     else()
         add_executable(ScreenAnalyser
             ${PROJECT_SOURCES}
+            screenshotstorage.h screenshotstorage.cpp
         )
     endif()
 endif()
 
-target_link_libraries(ScreenAnalyser PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(ScreenAnalyser PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt5::Core Qt5::Quick Qt5::Sql)
 
 # Qt for iOS sets MACOSX_BUNDLE_GUI_IDENTIFIER automatically since Qt 6.1.
 # If you are developing for iOS or macOS you should consider setting an

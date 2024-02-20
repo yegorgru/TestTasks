@@ -23,7 +23,12 @@ MainWindow::~MainWindow()
 
 void MainWindow::makeScreenshot() {
     hide();
-    QTimer::singleShot(500, this, SLOT(setScreenScene()));
+    QTimer::singleShot(500, this, SLOT(processScreenshot()));
+}
+
+void MainWindow::processScreenshot() {
+    setScreenScene();
+    saveToDb();
 }
 
 void MainWindow::setScreenScene() {
@@ -34,6 +39,14 @@ void MainWindow::setScreenScene() {
     mScene->setSceneRect(mImage.rect());
     ui->screenshotView->setScene(mScene);
     show();
+}
+
+void MainWindow::saveToDb() {
+    QByteArray inByteArray;
+    QBuffer inBuffer(&inByteArray);
+    inBuffer.open(QIODevice::WriteOnly);
+    mImage.save(&inBuffer, "PNG");
+    mStorage.insertScreenshot(inByteArray);
 }
 
 void MainWindow::buttonClicked(bool checked) {
