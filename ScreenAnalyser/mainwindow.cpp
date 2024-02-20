@@ -1,5 +1,8 @@
 #include <iostream>
 
+#include <QPixmap>
+#include <QScreen>
+
 #include "mainwindow.h"
 #include "./ui_mainwindow.h"
 
@@ -19,7 +22,18 @@ MainWindow::~MainWindow()
 }
 
 void MainWindow::makeScreenshot() {
-    std::cout << "Make screenhot" << std::endl;
+    hide();
+    QTimer::singleShot(500, this, SLOT(setScreenScene()));
+}
+
+void MainWindow::setScreenScene() {
+    QScreen* screen = QGuiApplication::screens()[0];
+    mImage = screen->grabWindow(0);
+    mScene = new QGraphicsScene(this);
+    mScene->addPixmap(mImage);
+    mScene->setSceneRect(mImage.rect());
+    ui->screenshotView->setScene(mScene);
+    show();
 }
 
 void MainWindow::buttonClicked(bool checked) {
