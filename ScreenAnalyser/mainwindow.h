@@ -23,12 +23,12 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-public:
 
 private:
-    void setScreenScene();
+    void grabScreen();
     void saveToDb();
     void loadCurrentPage();
+    void loadCurrentScreenshot();
 
 
 private slots:
@@ -37,6 +37,7 @@ private slots:
     void processScreenshot();
     void loadPrevPage();
     void loadNextPage();
+    void onScreensTableClicked(const QModelIndex &index);
 
 private:
     using Timer = std::unique_ptr<QTimer>;
@@ -47,6 +48,8 @@ private:
     QPixmap mImage;
     QSqlQueryModel mModel;
     int mModelOffset;
+    int mCurrentScreenId;
+    int mLoadedScreenId;
     ScreenshotStorage mStorage;
 };
 #endif // MAINWINDOW_H

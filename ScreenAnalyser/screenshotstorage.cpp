@@ -49,3 +49,25 @@ void ScreenshotStorage::loadScreensPage(QSqlQueryModel& model, int offset) {
     }
     model.setQuery(query);
 }
+
+QByteArray ScreenshotStorage::getLastScreenshot(){
+    QSqlQuery query;
+    query.prepare("SELECT Image FROM Screenshot ORDER BY ScreenshotID DESC LIMIT 0, 1");
+    query.exec();
+    query.first();
+    QByteArray res = query.value(0).toByteArray();
+    return res;
+}
+
+QByteArray ScreenshotStorage::getScreenshotById(int screenshotId) {
+    if(screenshotId == LAST_SCREEN_ID) {
+        return getLastScreenshot();
+    }
+    QSqlQuery query;
+    query.prepare("SELECT Image FROM Screenshot WHERE ScreenshotId = :SCREENSHOT_ID");
+    query.bindValue(":SCREENSHOT_ID", screenshotId);
+    query.exec();
+    query.first();
+    QByteArray res = query.value(0).toByteArray();
+    return res;
+}

@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
 {
+    mCurrentScreenId = ScreenshotStorage::LAST_SCREEN_ID;
+    mLoadedScreenId = ScreenshotStorage::LAST_SCREEN_ID;
     mModelOffset = 0;
     ui->setupUi(this);
     mTimer = std::make_unique<QTimer>(this);
@@ -17,8 +19,10 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::buttonClicked);
     connect(ui->prevButton, &QPushButton::clicked, this, &MainWindow::loadPrevPage);
     connect(ui->nextButton, &QPushButton::clicked, this, &MainWindow::loadNextPage);
+    connect(ui->screensTableView, &QTableView::clicked, this, &MainWindow::onScreensTableClicked);
     ui->screensTableView->setModel(&mModel);
     loadCurrentPage();
+    loadCurrentScreenshot();
 }
 
 MainWindow::~MainWindow()
@@ -32,18 +36,15 @@ void MainWindow::makeScreenshot() {
 }
 
 void MainWindow::processScreenshot() {
-    setScreenScene();
+    grabScreen();
     saveToDb();
     loadCurrentPage();
+    loadCurrentScreenshot();
 }
 
-void MainWindow::setScreenScene() {
+void MainWindow::grabScreen() {
     QScreen* screen = QGuiApplication::screens()[0];
     mImage = screen->grabWindow(0);
-    mScene = new QGraphicsScene(this);
-    mScene->addPixmap(mImage);
-    mScene->setSceneRect(mImage.rect());
-    ui->screenshotView->setScene(mScene);
     show();
 }
 
@@ -82,5 +83,34 @@ void MainWindow::loadNextPage() {
     mStorage.loadScreensPage(mModel, mModelOffset);
     if(mModel.rowCount() == 0) {
         loadPrevPage();
+    }
+}
+
+void MainWindow::loadCurrentScreenshot() {
+    if(mLoadedScreenId == mCurrentScreenId && mCurrentScreenId != ScreenshotStorage::LAST_SCREEN_ID) {
+        return;
+    }
+    auto bytes = mStorage.getScreenshotById(mCurrentScreenId);
+    if(mImage.loadFromData(bytes, "PNG"))
+    {
+        mScene = new QGraphicsScene(this);
+        mScene->addPixmap(mImage);
+        mScene->setSceneRect(mImage.rect());
+        ui->screenshotView->setScene(mScene);
+    }
+    else {
+        qCritical() << "Failed to load screenshot";
+    }
+}
+
+void MainWindow::onScreensTableClicked(const QModelIndex &index)
+{
+    if (index.isValid()) {
+        int indexRow = index.row();
+        mCurrentScreenId = mModel.record(indexRow).field("ScreenshotID").value().toInt();
+        if(indexRow == 0 && mModelOffset == 0) {
+            mCurrentScreenId = ScreenshotStorage::LAST_SCREEN_ID;
+        }
+        loadCurrentScreenshot();
     }
 }
