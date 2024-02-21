@@ -90,13 +90,23 @@ void MainWindow::loadCurrentScreenshot() {
     if(mLoadedScreenId == mCurrentScreenId && mCurrentScreenId != ScreenshotStorage::LAST_SCREEN_ID) {
         return;
     }
-    auto bytes = mStorage.getScreenshotById(mCurrentScreenId);
+    auto record = mStorage.getScreenshotById(mCurrentScreenId);
+    auto bytes = record.value("Image").toByteArray();
     if(mImage.loadFromData(bytes, "PNG"))
     {
         mScene = new QGraphicsScene(this);
         mScene->addPixmap(mImage);
         mScene->setSceneRect(mImage.rect());
         ui->screenshotView->setScene(mScene);
+
+        auto id = record.value("ScreenshotId").toString();
+        auto hashsum = record.value("Hashsum").toString();
+        auto percentage = record.value("Percentage").toString();
+        auto dateTime = record.value("DateTime").toString();
+        ui->idLabel->setText(QString("ID: ") + id);
+        ui->percentageLabel->setText(QString("Similarity percentage: ") + percentage);
+        ui->hashsumLabel->setText(QString("Hashsum: ") + hashsum);
+        ui->dateTimeLabel->setText(QString("Date and time: ") + dateTime);
     }
     else {
         qCritical() << "Failed to load screenshot";

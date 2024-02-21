@@ -11,11 +11,11 @@ public:
     ScreenshotStorage();
     void insertScreenshot(QByteArray& img);
     void loadScreensPage(QSqlQueryModel& model, int offset);
-    QByteArray getScreenshotById(int screenshotId);
+    QSqlRecord getScreenshotById(int screenshotId);
 public:
     static const int LAST_SCREEN_ID = -1;
 private:
-    QByteArray getLastScreenshot();
+    QSqlRecord getLastScreenshot();
 
 private:
     QSqlDatabase mDatabase;

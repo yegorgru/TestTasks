@@ -50,24 +50,22 @@ void ScreenshotStorage::loadScreensPage(QSqlQueryModel& model, int offset) {
     model.setQuery(query);
 }
 
-QByteArray ScreenshotStorage::getLastScreenshot(){
+QSqlRecord ScreenshotStorage::getLastScreenshot(){
     QSqlQuery query;
-    query.prepare("SELECT Image FROM Screenshot ORDER BY ScreenshotID DESC LIMIT 0, 1");
+    query.prepare("SELECT Image, ScreenshotId, Hashsum, Percentage, DateTime FROM Screenshot ORDER BY ScreenshotID DESC LIMIT 0, 1");
     query.exec();
     query.first();
-    QByteArray res = query.value(0).toByteArray();
-    return res;
+    return query.record();
 }
 
-QByteArray ScreenshotStorage::getScreenshotById(int screenshotId) {
+QSqlRecord ScreenshotStorage::getScreenshotById(int screenshotId) {
     if(screenshotId == LAST_SCREEN_ID) {
         return getLastScreenshot();
     }
     QSqlQuery query;
-    query.prepare("SELECT Image FROM Screenshot WHERE ScreenshotId = :SCREENSHOT_ID");
+    query.prepare("SELECT Image, ScreenshotId, Hashsum, Percentage, DateTime FROM Screenshot WHERE ScreenshotId = :SCREENSHOT_ID");
     query.bindValue(":SCREENSHOT_ID", screenshotId);
     query.exec();
     query.first();
-    QByteArray res = query.value(0).toByteArray();
-    return res;
+    return query.record();
 }

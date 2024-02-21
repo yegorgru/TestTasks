@@ -16,9 +16,9 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
     <item row="2" column="0">
-     <widget class="QLabel" name="label">
+     <widget class="QLabel" name="idLabel">
       <property name="text">
-       <string>ID</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -33,16 +33,16 @@
      </widget>
     </item>
     <item row="3" column="0">
-     <widget class="QLabel" name="label_2">
+     <widget class="QLabel" name="percentageLabel">
       <property name="text">
-       <string>Similarity percentage </string>
+       <string/>
       </property>
      </widget>
     </item>
     <item row="4" column="0">
-     <widget class="QLabel" name="label_3">
+     <widget class="QLabel" name="hashsumLabel">
       <property name="text">
-       <string>Hashsum</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -57,9 +57,9 @@
      </widget>
     </item>
     <item row="5" column="0">
-     <widget class="QLabel" name="label_4">
+     <widget class="QLabel" name="dateTimeLabel">
       <property name="text">
-       <string>Date and time</string>
+       <string/>
       </property>
      </widget>
     </item>
@@ -72,6 +72,32 @@
        <string>Next page</string>
       </property>
      </widget>
+    </item>
+    <item row="4" column="1">
+     <spacer name="horizontalSpacer">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
+    </item>
+    <item row="5" column="1">
+     <spacer name="horizontalSpacer_2">
+      <property name="orientation">
+       <enum>Qt::Horizontal</enum>
+      </property>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>40</width>
+        <height>20</height>
+       </size>
+      </property>
+     </spacer>
     </item>
    </layout>
   </widget>
