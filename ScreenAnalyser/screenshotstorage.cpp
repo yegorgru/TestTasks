@@ -31,3 +31,21 @@ void ScreenshotStorage::insertScreenshot(QByteArray& img) {
         qCritical() << "Insert failed: " << query.lastError().text();
     }
 }
+
+void ScreenshotStorage::loadScreensPage(QSqlQueryModel& model, int offset) {
+    QSqlQuery query;
+    bool res = query.prepare("SELECT ScreenshotID, HashSum, Percentage, DateTime FROM Screenshot LIMIT :FIRST_RECORD , 10");
+    if(!res) {
+        qCritical() << "Failed to prepare select query: " << query.lastError().text();
+        return;
+    }
+    query.bindValue(":FIRST_RECORD", offset);
+    if(query.exec()) {
+        qInfo() << "Selected rows successfully";
+    }
+    else {
+        qCritical() << "Select failed: " << query.lastError().text();
+        return;
+    }
+    model.setQuery(query);
+}

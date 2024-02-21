@@ -8,6 +8,7 @@ class ScreenshotStorage
 public:
     ScreenshotStorage();
     void insertScreenshot(QByteArray& img);
+    void loadScreensPage(QSqlQueryModel& model, int offset);
 
 private:
     QSqlDatabase mDatabase;

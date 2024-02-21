@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>949</width>
+    <height>634</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -15,7 +15,14 @@
   </property>
   <widget class="QWidget" name="centralwidget">
    <layout class="QGridLayout" name="gridLayout">
-    <item row="1" column="0">
+    <item row="2" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>ID</string>
+      </property>
+     </widget>
+    </item>
+    <item row="7" column="0">
      <widget class="QPushButton" name="startStopButton">
       <property name="text">
        <string>Start/Stop</string>
@@ -25,8 +32,46 @@
       </property>
      </widget>
     </item>
-    <item row="0" column="0">
+    <item row="3" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Similarity percentage </string>
+      </property>
+     </widget>
+    </item>
+    <item row="4" column="0">
+     <widget class="QLabel" name="label_3">
+      <property name="text">
+       <string>Hashsum</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="1">
+     <widget class="QTableView" name="screensTableView"/>
+    </item>
+    <item row="2" column="1">
+     <widget class="QPushButton" name="prevButton">
+      <property name="text">
+       <string>Previous page</string>
+      </property>
+     </widget>
+    </item>
+    <item row="5" column="0">
+     <widget class="QLabel" name="label_4">
+      <property name="text">
+       <string>Date and time</string>
+      </property>
+     </widget>
+    </item>
+    <item row="1" column="0">
      <widget class="QGraphicsView" name="screenshotView"/>
+    </item>
+    <item row="3" column="1">
+     <widget class="QPushButton" name="nextButton">
+      <property name="text">
+       <string>Next page</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

@@ -28,12 +28,15 @@ public:
 private:
     void setScreenScene();
     void saveToDb();
+    void updatePrevScreens();
 
 
 private slots:
     void buttonClicked(bool checked);
     void makeScreenshot();
     void processScreenshot();
+    void loadPrevPage();
+    void loadNextPage();
 
 private:
     using Timer = std::unique_ptr<QTimer>;
@@ -42,6 +45,8 @@ private:
     Timer mTimer;
     QGraphicsScene *mScene;
     QPixmap mImage;
+    QSqlQueryModel mModel;
+    int mModelOffset;
     ScreenshotStorage mStorage;
 };
 #endif // MAINWINDOW_H
