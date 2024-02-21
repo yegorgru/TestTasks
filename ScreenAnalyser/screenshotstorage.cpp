@@ -34,7 +34,7 @@ void ScreenshotStorage::insertScreenshot(QByteArray& img) {
 
 void ScreenshotStorage::loadScreensPage(QSqlQueryModel& model, int offset) {
     QSqlQuery query;
-    bool res = query.prepare("SELECT ScreenshotID, HashSum, Percentage, DateTime FROM Screenshot LIMIT :FIRST_RECORD , 10");
+    bool res = query.prepare("SELECT ScreenshotID, HashSum, Percentage, DateTime FROM Screenshot ORDER BY ScreenshotID DESC LIMIT :FIRST_RECORD , 10");
     if(!res) {
         qCritical() << "Failed to prepare select query: " << query.lastError().text();
         return;

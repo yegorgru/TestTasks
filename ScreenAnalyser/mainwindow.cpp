@@ -18,7 +18,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(ui->prevButton, &QPushButton::clicked, this, &MainWindow::loadPrevPage);
     connect(ui->nextButton, &QPushButton::clicked, this, &MainWindow::loadNextPage);
     ui->screensTableView->setModel(&mModel);
-    updatePrevScreens();
+    loadCurrentPage();
 }
 
 MainWindow::~MainWindow()
@@ -34,7 +34,7 @@ void MainWindow::makeScreenshot() {
 void MainWindow::processScreenshot() {
     setScreenScene();
     saveToDb();
-    updatePrevScreens();
+    loadCurrentPage();
 }
 
 void MainWindow::setScreenScene() {
@@ -64,14 +64,23 @@ void MainWindow::buttonClicked(bool checked) {
     }
 }
 
-void MainWindow::updatePrevScreens() {
-    mStorage.loadScreensPage(mModel, mModelOffset);
+void MainWindow::loadCurrentPage() {
+    if(mModelOffset == 0) {
+        mStorage.loadScreensPage(mModel, mModelOffset);
+    }
 }
 
 void MainWindow::loadPrevPage() {
-    qInfo() << "load prev page";
+    if(mModelOffset != 0) {
+        mModelOffset -= 10;
+        mStorage.loadScreensPage(mModel, mModelOffset);
+    }
 }
 
 void MainWindow::loadNextPage() {
-    qInfo() << "load next page";
+    mModelOffset += 10;
+    mStorage.loadScreensPage(mModel, mModelOffset);
+    if(mModel.rowCount() == 0) {
+        loadPrevPage();
+    }
 }

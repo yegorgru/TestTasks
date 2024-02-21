@@ -28,7 +28,7 @@ public:
 private:
     void setScreenScene();
     void saveToDb();
-    void updatePrevScreens();
+    void loadCurrentPage();
 
 
 private slots:
