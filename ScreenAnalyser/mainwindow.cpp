@@ -4,6 +4,7 @@
 #include <QScreen>
 
 #include "mainwindow.h"
+#include "imagealgorithms.h"
 #include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
@@ -32,7 +33,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::makeScreenshot() {
     hide();
-    QTimer::singleShot(500, this, SLOT(processScreenshot()));
+    QTimer::singleShot(500, this, &MainWindow::processScreenshot);
 }
 
 void MainWindow::processScreenshot() {
@@ -53,7 +54,10 @@ void MainWindow::saveToDb() {
     QBuffer inBuffer(&inByteArray);
     inBuffer.open(QIODevice::WriteOnly);
     mImage.save(&inBuffer, "PNG");
-    mStorage.insertScreenshot(inByteArray);
+    int hashsum = ImageAlgorithms::findHashSum(mImage.toImage());
+    int percentage = mPrevImage.isNull() ? 0 : ImageAlgorithms::compareByPixels(mImage.toImage(), mPrevImage.toImage());
+    mPrevImage = mImage.copy();
+    mStorage.insertScreenshot(inByteArray, hashsum, percentage);
 }
 
 void MainWindow::buttonClicked(bool checked) {
@@ -92,6 +96,9 @@ void MainWindow::loadCurrentScreenshot() {
     }
     auto record = mStorage.getScreenshotById(mCurrentScreenId);
     auto bytes = record.value("Image").toByteArray();
+    if(bytes.isEmpty()) {
+        return;
+    }
     if(mImage.loadFromData(bytes, "PNG"))
     {
         mScene = new QGraphicsScene(this);

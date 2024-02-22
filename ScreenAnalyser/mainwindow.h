@@ -45,6 +45,7 @@ private:
     Ui::MainWindow *ui;
     Timer mTimer;
     QGraphicsScene *mScene;
+    QPixmap mPrevImage;
     QPixmap mImage;
     QSqlQueryModel mModel;
     int mModelOffset;

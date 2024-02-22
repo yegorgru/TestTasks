@@ -10,7 +10,7 @@ ScreenshotStorage::ScreenshotStorage():
     }
 }
 
-void ScreenshotStorage::insertScreenshot(QByteArray& img) {
+void ScreenshotStorage::insertScreenshot(QByteArray& img, int hashsum, int percentage) {
     if(!mDatabase.isOpen()) {
         qWarning() << "Database is not open. Ignoring insert";
     }
@@ -22,8 +22,8 @@ void ScreenshotStorage::insertScreenshot(QByteArray& img) {
         return;
     }
     query.bindValue(":IMAGE", img, QSql::In | QSql::Binary);
-    query.bindValue(":HASHSUM", 2);
-    query.bindValue(":PERCENTAGE", 3);
+    query.bindValue(":HASHSUM", hashsum);
+    query.bindValue(":PERCENTAGE", percentage);
     if(query.exec()) {
         qInfo() << "Screenshot saved to database successfully";
     }

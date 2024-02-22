@@ -9,7 +9,7 @@ class ScreenshotStorage
 {
 public:
     ScreenshotStorage();
-    void insertScreenshot(QByteArray& img);
+    void insertScreenshot(QByteArray& img, int hashsum, int percentage);
     void loadScreensPage(QSqlQueryModel& model, int offset);
     QSqlRecord getScreenshotById(int screenshotId);
 public:

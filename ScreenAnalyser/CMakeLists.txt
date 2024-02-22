@@ -9,7 +9,7 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 11)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Widgets)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
 find_package(Qt5 REQUIRED COMPONENTS Core Quick Sql)
 
@@ -20,28 +20,19 @@ set(PROJECT_SOURCES
         mainwindow.ui
 )
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_executable(ScreenAnalyser
-        MANUAL_FINALIZATION
+if(ANDROID)
+    add_library(ScreenAnalyser SHARED
         ${PROJECT_SOURCES}
     )
-# Define target properties for Android with Qt 6 as:
-#    set_property(TARGET ScreenAnalyser APPEND PROPERTY QT_ANDROID_PACKAGE_SOURCE_DIR
-#                 ${CMAKE_CURRENT_SOURCE_DIR}/android)
-# For more information, see https://doc.qt.io/qt-6/qt-add-executable.html#target-creation
-else()
-    if(ANDROID)
-        add_library(ScreenAnalyser SHARED
-            ${PROJECT_SOURCES}
-        )
 # Define properties for Android with Qt 5 after find_package() calls as:
 #    set(ANDROID_PACKAGE_SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/android")
-    else()
-        add_executable(ScreenAnalyser
-            ${PROJECT_SOURCES}
-            screenshotstorage.h screenshotstorage.cpp
-        )
-    endif()
+else()
+    add_executable(ScreenAnalyser
+        ${PROJECT_SOURCES}
+        screenshotstorage.h screenshotstorage.cpp
+        imagealgorithms.h
+        imagealgorithms.cpp
+    )
 endif()
 
 target_link_libraries(ScreenAnalyser PRIVATE Qt${QT_VERSION_MAJOR}::Widgets Qt5::Core Qt5::Quick Qt5::Sql)
@@ -66,7 +57,3 @@ install(TARGETS ScreenAnalyser
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
     RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
 )
-
-if(QT_VERSION_MAJOR EQUAL 6)
-    qt_finalize_executable(ScreenAnalyser)
-endif()
