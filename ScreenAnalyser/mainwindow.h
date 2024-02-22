@@ -2,7 +2,6 @@
 #define MAINWINDOW_H
 
 #include "screenshotstorage.h"
-#include "imageworker.h"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -10,7 +9,6 @@
 #include <QPixmap>
 
 #include <memory>
-#include <future>
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -26,15 +24,17 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+public slots:
+    void refresh();
+
 private:
+    void setupConnections();
+    void setupWorkerThread();
     void loadCurrentPage();
     void loadCurrentScreenshot();
 
-public slots:
-    void loadNewData();
-
 private slots:
-    void buttonClicked(bool checked);
+    void startStopButtonClicked(bool checked);
     void makeScreenshot();
     void processScreenshot();
     void loadPrevPage();
@@ -46,10 +46,11 @@ signals:
 
 private:
     using Timer = std::unique_ptr<QTimer>;
+    using UI = std::unique_ptr<Ui::MainWindow>;
 private:
-    Ui::MainWindow *ui;
+    UI mUi;
     Timer mTimer;
-    QGraphicsScene *mScene;
+    QGraphicsScene mScene;
     QPixmap mImage;
     QSqlQueryModel mModel;
     int mModelOffset;

@@ -7,36 +7,91 @@
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+    , mUi(std::make_unique<Ui::MainWindow>())
+    , mTimer(std::make_unique<QTimer>(this))
+    , mScene(this)
+    , mModelOffset(0)
+    , mCurrentScreenId(ScreenshotStorage::LAST_SCREEN_ID)
+    , mLoadedScreenId(ScreenshotStorage::LAST_SCREEN_ID)
     , mStorage("RootStorage")
 {
-    mCurrentScreenId = ScreenshotStorage::LAST_SCREEN_ID;
-    mLoadedScreenId = ScreenshotStorage::LAST_SCREEN_ID;
-    mModelOffset = 0;
-    ui->setupUi(this);
-    mTimer = std::make_unique<QTimer>(this);
-    connect(mTimer.get(), SIGNAL(timeout()), this, SLOT(makeScreenshot()));
-    connect(ui->startStopButton, &QPushButton::clicked, this, &MainWindow::buttonClicked);
-    connect(ui->prevButton, &QPushButton::clicked, this, &MainWindow::loadPrevPage);
-    connect(ui->nextButton, &QPushButton::clicked, this, &MainWindow::loadNextPage);
-    connect(ui->screensTableView, &QTableView::clicked, this, &MainWindow::onScreensTableClicked);
-    ui->screensTableView->setModel(&mModel);
-    loadCurrentPage();
-    loadCurrentScreenshot();
+    mUi->setupUi(this);
 
-    ImageWorker* imageWorker = new ImageWorker;
-    imageWorker->moveToThread(&mWorkerThread);
-    connect(&mWorkerThread, &QThread::finished, imageWorker, &QObject::deleteLater);
-    connect(this, &MainWindow::processNextScreenshot, imageWorker, &ImageWorker::processScreenshot);
-    connect(imageWorker, &ImageWorker::processingFinished, this, &MainWindow::loadNewData);
-    mWorkerThread.start();
+    mUi->screensTableView->setModel(&mModel);
+
+    setupConnections();
+    setupWorkerThread();
+
+    refresh();
 }
 
 MainWindow::~MainWindow()
 {
     mWorkerThread.quit();
     mWorkerThread.wait();
-    delete ui;
+}
+
+void MainWindow::refresh() {
+    loadCurrentPage();
+    loadCurrentScreenshot();
+}
+
+void MainWindow::setupConnections() {
+    connect(mTimer.get(), SIGNAL(timeout()), this, SLOT(makeScreenshot()));
+    connect(mUi->startStopButton, &QPushButton::clicked, this, &MainWindow::startStopButtonClicked);
+    connect(mUi->prevButton, &QPushButton::clicked, this, &MainWindow::loadPrevPage);
+    connect(mUi->nextButton, &QPushButton::clicked, this, &MainWindow::loadNextPage);
+    connect(mUi->screensTableView, &QTableView::clicked, this, &MainWindow::onScreensTableClicked);
+}
+
+void MainWindow::setupWorkerThread() {
+    ImageWorker* imageWorker = new ImageWorker;
+    imageWorker->moveToThread(&mWorkerThread);
+    connect(&mWorkerThread, &QThread::finished, imageWorker, &QObject::deleteLater);
+    connect(this, &MainWindow::processNextScreenshot, imageWorker, &ImageWorker::processScreenshot);
+    connect(imageWorker, &ImageWorker::processingFinished, this, &MainWindow::refresh);
+    mWorkerThread.start();
+}
+
+void MainWindow::loadCurrentPage() {
+    if(mModelOffset == 0) {
+        mStorage.loadScreensPage(mModel, mModelOffset);
+    }
+}
+
+void MainWindow::loadCurrentScreenshot() {
+    if(mLoadedScreenId == mCurrentScreenId && mCurrentScreenId != ScreenshotStorage::LAST_SCREEN_ID) {
+        return;
+    }
+    mStorage.prepareScreenshotById(mCurrentScreenId);
+    auto bytes = mStorage.getImage();
+    if(bytes.isEmpty()) {
+        return;
+    }
+    if(mImage.loadFromData(bytes, "PNG"))
+    {
+        mScene.clear();
+        mScene.addPixmap(mImage);
+        mScene.setSceneRect(mImage.rect());
+        mUi->screenshotView->setScene(&mScene);
+
+        mUi->idLabel->setText(QString("ID: ") + mStorage.getScreenshotId());
+        mUi->percentageLabel->setText(QString("Similarity percentage: ") + mStorage.getSimilarityPercentage());
+        mUi->hashsumLabel->setText(QString("Hashsum: ") + mStorage.getHashsum());
+        mUi->dateTimeLabel->setText(QString("Date and time: ") + mStorage.getDateTime());
+    }
+    else {
+        qCritical() << "Failed to load screenshot";
+    }
+}
+
+void MainWindow::startStopButtonClicked(bool checked) {
+    if(checked) {
+        mTimer->start(60000);
+    }
+    else {
+        mTimer->stop();
+    }
 }
 
 void MainWindow::makeScreenshot() {
@@ -45,30 +100,10 @@ void MainWindow::makeScreenshot() {
 }
 
 void MainWindow::processScreenshot() {
-    QScreen* screen = QGuiApplication::screens()[0];
-    mImage = screen->grabWindow(0);
+    auto screens = QGuiApplication::screens();
+    mImage = screens[0]->grabWindow(0);
     show();
     emit processNextScreenshot(mImage);
-}
-
-void MainWindow::loadNewData() {
-    loadCurrentPage();
-    loadCurrentScreenshot();
-}
-
-void MainWindow::buttonClicked(bool checked) {
-    if(checked) {
-        mTimer->start(6000);
-    }
-    else {
-        mTimer->stop();
-    }
-}
-
-void MainWindow::loadCurrentPage() {
-    if(mModelOffset == 0) {
-        mStorage.loadScreensPage(mModel, mModelOffset);
-    }
 }
 
 void MainWindow::loadPrevPage() {
@@ -86,38 +121,7 @@ void MainWindow::loadNextPage() {
     }
 }
 
-void MainWindow::loadCurrentScreenshot() {
-    if(mLoadedScreenId == mCurrentScreenId && mCurrentScreenId != ScreenshotStorage::LAST_SCREEN_ID) {
-        return;
-    }
-    auto record = mStorage.getScreenshotById(mCurrentScreenId);
-    auto bytes = record.value("Image").toByteArray();
-    if(bytes.isEmpty()) {
-        return;
-    }
-    if(mImage.loadFromData(bytes, "PNG"))
-    {
-        mScene = new QGraphicsScene(this);
-        mScene->addPixmap(mImage);
-        mScene->setSceneRect(mImage.rect());
-        ui->screenshotView->setScene(mScene);
-
-        auto id = record.value("ScreenshotId").toString();
-        auto hashsum = record.value("Hashsum").toString();
-        auto percentage = record.value("Percentage").toString();
-        auto dateTime = record.value("DateTime").toString();
-        ui->idLabel->setText(QString("ID: ") + id);
-        ui->percentageLabel->setText(QString("Similarity percentage: ") + percentage);
-        ui->hashsumLabel->setText(QString("Hashsum: ") + hashsum);
-        ui->dateTimeLabel->setText(QString("Date and time: ") + dateTime);
-    }
-    else {
-        qCritical() << "Failed to load screenshot";
-    }
-}
-
-void MainWindow::onScreensTableClicked(const QModelIndex &index)
-{
+void MainWindow::onScreensTableClicked(const QModelIndex& index) {
     if (index.isValid()) {
         int indexRow = index.row();
         mCurrentScreenId = mModel.record(indexRow).field("ScreenshotID").value().toInt();
