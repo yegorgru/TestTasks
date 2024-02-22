@@ -3,12 +3,10 @@
 
 #include <QtSql>
 
-
-
 class ScreenshotStorage
 {
 public:
-    ScreenshotStorage();
+    ScreenshotStorage(const std::string& name);
     void insertScreenshot(QByteArray& img, int hashsum, int percentage);
     void loadScreensPage(QSqlQueryModel& model, int offset);
     QSqlRecord getScreenshotById(int screenshotId);
@@ -16,7 +14,6 @@ public:
     static const int LAST_SCREEN_ID = -1;
 private:
     QSqlRecord getLastScreenshot();
-
 private:
     QSqlDatabase mDatabase;
 };

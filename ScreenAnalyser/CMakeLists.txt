@@ -32,6 +32,7 @@ else()
         screenshotstorage.h screenshotstorage.cpp
         imagealgorithms.h
         imagealgorithms.cpp
+        imageworker.h imageworker.cpp
     )
 endif()
 

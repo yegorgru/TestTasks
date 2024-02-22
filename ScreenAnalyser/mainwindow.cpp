@@ -1,15 +1,14 @@
-#include <iostream>
-
 #include <QPixmap>
 #include <QScreen>
 
 #include "mainwindow.h"
-#include "imagealgorithms.h"
+#include "imageworker.h"
 #include "./ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
     , ui(new Ui::MainWindow)
+    , mStorage("RootStorage")
 {
     mCurrentScreenId = ScreenshotStorage::LAST_SCREEN_ID;
     mLoadedScreenId = ScreenshotStorage::LAST_SCREEN_ID;
@@ -24,10 +23,19 @@ MainWindow::MainWindow(QWidget *parent)
     ui->screensTableView->setModel(&mModel);
     loadCurrentPage();
     loadCurrentScreenshot();
+
+    ImageWorker* imageWorker = new ImageWorker;
+    imageWorker->moveToThread(&mWorkerThread);
+    connect(&mWorkerThread, &QThread::finished, imageWorker, &QObject::deleteLater);
+    connect(this, &MainWindow::processNextScreenshot, imageWorker, &ImageWorker::processScreenshot);
+    connect(imageWorker, &ImageWorker::processingFinished, this, &MainWindow::loadNewData);
+    mWorkerThread.start();
 }
 
 MainWindow::~MainWindow()
 {
+    mWorkerThread.quit();
+    mWorkerThread.wait();
     delete ui;
 }
 
@@ -37,27 +45,15 @@ void MainWindow::makeScreenshot() {
 }
 
 void MainWindow::processScreenshot() {
-    grabScreen();
-    saveToDb();
-    loadCurrentPage();
-    loadCurrentScreenshot();
-}
-
-void MainWindow::grabScreen() {
     QScreen* screen = QGuiApplication::screens()[0];
     mImage = screen->grabWindow(0);
     show();
+    emit processNextScreenshot(mImage);
 }
 
-void MainWindow::saveToDb() {
-    QByteArray inByteArray;
-    QBuffer inBuffer(&inByteArray);
-    inBuffer.open(QIODevice::WriteOnly);
-    mImage.save(&inBuffer, "PNG");
-    int hashsum = ImageAlgorithms::findHashSum(mImage.toImage());
-    int percentage = mPrevImage.isNull() ? 0 : ImageAlgorithms::compareByPixels(mImage.toImage(), mPrevImage.toImage());
-    mPrevImage = mImage.copy();
-    mStorage.insertScreenshot(inByteArray, hashsum, percentage);
+void MainWindow::loadNewData() {
+    loadCurrentPage();
+    loadCurrentScreenshot();
 }
 
 void MainWindow::buttonClicked(bool checked) {

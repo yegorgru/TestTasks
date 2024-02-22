@@ -1,7 +1,9 @@
 #include "screenshotstorage.h"
 
-ScreenshotStorage::ScreenshotStorage():
-    mDatabase(QSqlDatabase::addDatabase("QSQLITE"))
+#include <QString>
+
+ScreenshotStorage::ScreenshotStorage(const std::string& name):
+    mDatabase(QSqlDatabase::addDatabase("QSQLITE", QString::fromStdString(name)))
 {
     QString dbPath = qgetenv("DB_PATH");
     mDatabase.setDatabaseName(qgetenv("DB_PATH"));
@@ -14,7 +16,7 @@ void ScreenshotStorage::insertScreenshot(QByteArray& img, int hashsum, int perce
     if(!mDatabase.isOpen()) {
         qWarning() << "Database is not open. Ignoring insert";
     }
-    QSqlQuery query;
+    QSqlQuery query(mDatabase);
     bool res = query.prepare("INSERT INTO SCREENSHOT (IMAGE, HASHSUM, PERCENTAGE) "
                   "VALUES (:IMAGE, :HASHSUM, :PERCENTAGE)");
     if(!res) {
@@ -33,7 +35,7 @@ void ScreenshotStorage::insertScreenshot(QByteArray& img, int hashsum, int perce
 }
 
 void ScreenshotStorage::loadScreensPage(QSqlQueryModel& model, int offset) {
-    QSqlQuery query;
+    QSqlQuery query(mDatabase);
     bool res = query.prepare("SELECT ScreenshotID, HashSum, Percentage, DateTime FROM Screenshot ORDER BY ScreenshotID DESC LIMIT :FIRST_RECORD , 10");
     if(!res) {
         qCritical() << "Failed to prepare select query: " << query.lastError().text();
@@ -51,7 +53,7 @@ void ScreenshotStorage::loadScreensPage(QSqlQueryModel& model, int offset) {
 }
 
 QSqlRecord ScreenshotStorage::getLastScreenshot(){
-    QSqlQuery query;
+    QSqlQuery query(mDatabase);
     query.prepare("SELECT Image, ScreenshotId, Hashsum, Percentage, DateTime FROM Screenshot ORDER BY ScreenshotID DESC LIMIT 0, 1");
     query.exec();
     query.first();
@@ -62,7 +64,7 @@ QSqlRecord ScreenshotStorage::getScreenshotById(int screenshotId) {
     if(screenshotId == LAST_SCREEN_ID) {
         return getLastScreenshot();
     }
-    QSqlQuery query;
+    QSqlQuery query(mDatabase);
     query.prepare("SELECT Image, ScreenshotId, Hashsum, Percentage, DateTime FROM Screenshot WHERE ScreenshotId = :SCREENSHOT_ID");
     query.bindValue(":SCREENSHOT_ID", screenshotId);
     query.exec();
