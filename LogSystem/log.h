@@ -21,7 +21,6 @@ Logger getLogger(const std::string& name = "");
 
 template <typename T>
 LogMessage Logger::operator<<(const T& message) {
-	// check if emit will be called
 	LogMessage logMessage(logLevelToStr(INFO));
 	logMessage << message;
 	return logMessage;

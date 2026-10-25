@@ -3,3 +3,4 @@ build*
 LogSystem/*
 !LogSystem/*.cpp
 !LogSystem/*.h
+LogSystem/test*
