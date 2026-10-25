@@ -17,14 +17,6 @@ const char* logLevelToStr(LogLevel logLevel) {
 
 }
 
-namespace LogSystemUtils {
-
-LogMessage::~LogMessage() {
-	std::cout << mStream.str() << std::endl;
-}
-
-} // namespace LogSystemUtils
-
 using namespace LogSystemUtils;
 
 Logger::Logger(const std::string& name) {
