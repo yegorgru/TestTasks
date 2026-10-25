@@ -16,8 +16,6 @@ enum LogLevel {
 	ERROR
 };
 
-const char* logLevelToStr(LogLevel logLevel);
-
 template<typename T>
 concept Printable = requires (T a)
 {
@@ -27,8 +25,7 @@ concept Printable = requires (T a)
 class LogMessage {
 	friend class Logger;
 private:
-	template<typename T>
-	LogMessage(const T& message) requires Printable<T>;
+	LogMessage(const LogLevel logLevel);
 	
 	LogMessage(const LogMessage&) = delete;
 	LogMessage(LogMessage&&) = default;
@@ -40,16 +37,13 @@ public:
 	template <typename T>
 	LogMessage& operator<<(const T& message) requires Printable<T>;
 private:
+	void printDateTime();
+	void printLogLevel(const LogLevel logLevel);
+	void printSeparator();
+private:
 	std::osyncstream mStream;
 };
 
-
-template<typename T>
-LogMessage::LogMessage(const T& message) requires Printable<T>
-	: mStream(std::cout)
-{
-	mStream << message;
-}
 
 template <typename T>
 LogMessage& LogMessage::operator<<(const T& message) requires Printable<T> {

@@ -7,7 +7,7 @@ Logger::Logger(const std::string& name) {
 }
 
 LogMessage Logger::operator()(LogLevel logLevel) {
-	return LogMessage(logLevelToStr(logLevel));
+	return LogMessage(logLevel);
 }
 
 Logger getLogger(const std::string& name) {

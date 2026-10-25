@@ -1,22 +1,47 @@
 #include "LogSystemUtils.h"
 
+#include <chrono>
+#include <format>
+
 namespace LogSystem {
+
+LogMessage::LogMessage(const LogLevel logLevel)
+	: mStream(std::cout)
+{
+	printDateTime();
+	printSeparator();
+	printLogLevel(logLevel);
+	printSeparator();
+}
 
 LogMessage::~LogMessage() {
 	mStream << std::endl;
 }
 
-const char* logLevelToStr(LogLevel logLevel) {
+void LogMessage::printDateTime() {
+	auto time = std::chrono::zoned_time{ std::chrono::current_zone(), std::chrono::floor<std::chrono::seconds>(std::chrono::system_clock::now()) };
+	mStream << std::format("{0:%d.%m.%Y %H:%M:%S}", time);
+}
+
+void LogMessage::printLogLevel(const LogLevel logLevel) {
 	switch (logLevel) {
 	case DEBUG:
-		return "DEBUG";
+		mStream << "DEBUG";
+		return;
 	case WARNING:
-		return "WARNING";
+		mStream << "WARNING";
+		return;
 	case ERROR:
-		return "ERROR";
+		mStream << "ERROR";
+		return;
 	default:
-		return "INFO";
+		mStream << "INFO";
+		return;
 	}
+}
+
+void LogMessage::printSeparator() {
+	mStream << "; ";
 }
 
 } // namespace LogSystem

@@ -21,7 +21,7 @@ Logger getLogger(const std::string& name = "");
 
 template <typename T>
 LogMessage Logger::operator<<(const T& message) {
-	LogMessage logMessage(logLevelToStr(INFO));
+	LogMessage logMessage(INFO);
 	logMessage << message;
 	return logMessage;
 }
