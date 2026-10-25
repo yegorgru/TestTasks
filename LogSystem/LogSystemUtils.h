@@ -1,9 +1,13 @@
 #ifndef LOGSYSTEMUTILS_H
 #define LOGSYSTEMUTILS_H
 
-#include <sstream>
 #include <iostream>
+#include <syncstream>
 
+
+namespace LogSystem {
+
+class Logger;
 
 enum LogLevel {
 	DEBUG,
@@ -12,10 +16,7 @@ enum LogLevel {
 	ERROR
 };
 
-class Logger;
-
-
-namespace LogSystemUtils {
+const char* logLevelToStr(LogLevel logLevel);
 
 template<typename T>
 concept Printable = requires (T a)
@@ -28,17 +29,25 @@ class LogMessage {
 private:
 	template<typename T>
 	LogMessage(const T& message) requires Printable<T>;
+	
+	LogMessage(const LogMessage&) = delete;
+	LogMessage(LogMessage&&) = default;
+	LogMessage& operator=(const LogMessage&) = delete;
+	LogMessage& operator=(LogMessage&&) = default;
 public:
 	~LogMessage();
 public:
 	template <typename T>
 	LogMessage& operator<<(const T& message) requires Printable<T>;
 private:
-	std::ostringstream mStream;
+	std::osyncstream mStream;
 };
 
+
 template<typename T>
-LogMessage::LogMessage(const T& message) requires Printable<T> {
+LogMessage::LogMessage(const T& message) requires Printable<T>
+	: mStream(std::cout)
+{
 	mStream << message;
 }
 
@@ -48,6 +57,6 @@ LogMessage& LogMessage::operator<<(const T& message) requires Printable<T> {
 	return *this;
 }
 
-} // namespace LogSystemUtils
+} // namespace LogSystem
 
 #endif LOGSYSTEMUTILS_H

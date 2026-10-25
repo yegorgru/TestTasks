@@ -1,10 +1,23 @@
 #include "LogSystemUtils.h"
 
-
-namespace LogSystemUtils {
+namespace LogSystem {
 
 LogMessage::~LogMessage() {
-	std::cout << mStream.str() << std::endl;
+	mStream << std::endl;
 }
 
-} // namespace LogSystemUtils
+const char* logLevelToStr(LogLevel logLevel) {
+	switch (logLevel) {
+	case DEBUG:
+		return "DEBUG";
+	case WARNING:
+		return "WARNING";
+	case ERROR:
+		return "ERROR";
+	default:
+		return "INFO";
+	}
+}
+
+} // namespace LogSystem
+
