@@ -9,6 +9,7 @@
 #include <array>
 #include <atomic>
 #include <utility>
+#include <limits>
 
 class TestRunner {
 public:
@@ -115,6 +116,7 @@ private:
 };
 
 class LoggerOwner1 {
+public:
     LoggerOwner1(Logger logger1, const Logger logger2, const Logger& logger3, Logger& logger4, Logger&& logger5)
         : mLogger(logger1)
         , mLoggerConst(logger2)
@@ -313,6 +315,35 @@ void creationTest() {
         auto logger3(std::move(logger));
         *logger3 << "789";
     }
+
+    Logger l1{ "1" };
+    Logger l2{ "2" };
+    Logger l3{ "3" };
+    Logger l4{ "4" };
+    Logger l5{ "5" };
+    LoggerOwner1 lo(l1, l2, l3, l4, std::move(l5));
+
+    lo.printMessage("m1");
+}
+
+struct PrintableStruct {
+    int mA = 5;
+    int mB = 6;
+};
+
+std::ostream& operator<<(std::ostream& os, const PrintableStruct& ab) {
+    os << ab.mA << "|" << ab.mB;
+    return os;
+}
+
+void testTypes() {
+    Logger logger{ "abc" };
+    const std::string str = "QQQ";
+    std::string_view sv = "WWW";
+    float f = 5.3;
+    PrintableStruct ab;
+    PrintableStruct cd{ 6, 7 };
+    logger << "abc" << ' ' << std::string("bcd") << ' ' << str << ' ' << sv << ' ' << 1 << ' ' << 2u << ' ' << f << ' ' << 6.7 << ' ' << std::numeric_limits<unsigned long long>::max() << ' ' << std::numeric_limits<long long>::min() << ' ' << 'c' << ' ' << false << true << std::boolalpha << false << true << " " << ab << " " << cd;
 }
 
 int main() {
@@ -330,6 +361,7 @@ int main() {
     //logger << "Finishing the app";
 
     creationTest();
+    testTypes();
 
     return 0;
 }
