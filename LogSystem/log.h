@@ -7,8 +7,10 @@
 
 namespace LogSystem {
 
-// potential improvements: write file/funtion name and line:
-// std::source_location::current()
+// potential improvements:
+// 1) write file/funtion name and line: std::source_location::current()
+// 2) allow to set minimal log level and do nothing for smaller levels. Needs macros
+
 
 class Logger {
 public:

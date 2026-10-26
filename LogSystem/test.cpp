@@ -347,18 +347,18 @@ void testTypes() {
 }
 
 int main() {
-    //auto logger = getLogger("Main");
-    //logger << "Starting the app";
+    auto logger = getLogger("Main");
+    logger << "Starting the app";
 
-    //{
-    //    logger << "Creating test object";
-    //    TestRunner testRunner;
-    //    logger << "Leaving test object scope";
-    //}
+    {
+        logger << "Creating test object";
+        TestRunner testRunner;
+        logger << "Leaving test object scope";
+    }
 
-    //logger(DEBUG) << "Threads joined";
+    logger(DEBUG) << "Threads joined";
 
-    //logger << "Finishing the app";
+    logger << "Finishing the app";
 
     creationTest();
     testTypes();
