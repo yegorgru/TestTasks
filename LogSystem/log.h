@@ -7,6 +7,9 @@
 
 namespace LogSystem {
 
+// potential improvements: write file/funtion name and line:
+// std::source_location::current()
+
 class Logger {
 public:
 	Logger(const std::string& name);
