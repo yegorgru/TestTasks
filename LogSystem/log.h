@@ -14,6 +14,8 @@ public:
 	LogMessage operator()(LogLevel logLevel);
 	template <typename T>
 	LogMessage operator<<(const T& message);
+private:
+	const std::string mName;
 };
 
 Logger getLogger(const std::string& name = "");
@@ -21,7 +23,7 @@ Logger getLogger(const std::string& name = "");
 
 template <typename T>
 LogMessage Logger::operator<<(const T& message) {
-	LogMessage logMessage(INFO);
+	LogMessage logMessage(INFO, mName);
 	logMessage << message;
 	return logMessage;
 }

@@ -2,12 +2,12 @@
 
 namespace LogSystem {
 
-Logger::Logger(const std::string& name) {
-
-}
+Logger::Logger(const std::string& name)
+	: mName(name)
+{ }
 
 LogMessage Logger::operator()(LogLevel logLevel) {
-	return LogMessage(logLevel);
+	return LogMessage(logLevel, mName);
 }
 
 Logger getLogger(const std::string& name) {

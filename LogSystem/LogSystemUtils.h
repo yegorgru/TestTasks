@@ -25,7 +25,7 @@ concept Printable = requires (T a)
 class LogMessage {
 	friend class Logger;
 private:
-	LogMessage(const LogLevel logLevel);
+	LogMessage(const LogLevel logLevel, const std::string& name);
 	
 	LogMessage(const LogMessage&) = delete;
 	LogMessage(LogMessage&&) = default;
@@ -39,7 +39,6 @@ public:
 private:
 	void printDateTime();
 	void printLogLevel(const LogLevel logLevel);
-	void printSeparator();
 private:
 	std::osyncstream mStream;
 };

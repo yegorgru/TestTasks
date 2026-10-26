@@ -5,13 +5,13 @@
 
 namespace LogSystem {
 
-LogMessage::LogMessage(const LogLevel logLevel)
+LogMessage::LogMessage(const LogLevel logLevel, const std::string& name)
 	: mStream(std::cout)
 {
 	printDateTime();
-	printSeparator();
+	mStream << "; ";
 	printLogLevel(logLevel);
-	printSeparator();
+	mStream << "; " << name << "(" << std::this_thread::get_id() << "): ";
 }
 
 LogMessage::~LogMessage() {
@@ -38,10 +38,6 @@ void LogMessage::printLogLevel(const LogLevel logLevel) {
 		mStream << "INFO";
 		return;
 	}
-}
-
-void LogMessage::printSeparator() {
-	mStream << "; ";
 }
 
 } // namespace LogSystem
