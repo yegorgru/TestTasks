@@ -6,6 +6,8 @@
 #include <string>
 #include <random>
 #include <mutex>
+#include <array>
+#include <atomic>
 
 class TestRunner {
 public:
@@ -22,12 +24,15 @@ public:
         for (int i = 0; i < threadNumber; ++i) {
             mThreads.emplace_back(&TestRunner::run, this);
         }
+
+        mLogger << "Leave ctor";
     }
 
     ~TestRunner() {
         mLogger << "Enter dtor";
         auto logger = getLogger("DtorLogger");
         logger(WARNING) << "Destructor. Threads will join";
+        mLogger << "Leave dtor";
     }
 
     void run() {
@@ -39,7 +44,7 @@ public:
         std::mt19937 mt(rd());
 
         auto randomSleep = [&mt]() {
-            auto sleepTime = mt() % 3000;
+            auto sleepTime = mt() % 500;
             auto logger = getLogger("Sleep");
             logger(WARNING) << "Will sleep " << sleepTime << " ms";
             std::this_thread::sleep_for(std::chrono::milliseconds(sleepTime));
@@ -60,8 +65,9 @@ public:
             auto enterLogger = getLogger("WaitEnterLogger");
             enterLogger(WARNING) << "Entered wait";
 
+            size_t mutexNumber = mt() % mMutexes.size();
             {
-                std::lock_guard<std::mutex> lg(mMutex);
+                std::lock_guard<std::mutex> lg(mMutexes[mutexNumber]);
                 randomSleep();
                 auto logger = getLogger("Wait");
                 logger(ERROR) << "Counter: " << ++mSharedCounter;
@@ -96,11 +102,13 @@ public:
         logger(DEBUG) << "Loop run end";
 
         logger << "Leaving run";
+
+        mLogger << "Leave run";
     }
 
 private:
-    std::mutex mMutex;
-    int mSharedCounter;
+    std::array<std::mutex, 3> mMutexes;
+    std::atomic<int> mSharedCounter;
     Logger mLogger;
     std::vector<std::jthread> mThreads;
 };
