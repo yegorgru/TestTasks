@@ -8,6 +8,7 @@
 #include <mutex>
 #include <array>
 #include <atomic>
+#include <utility>
 
 class TestRunner {
 public:
@@ -113,19 +114,222 @@ private:
     std::vector<std::jthread> mThreads;
 };
 
-int main() {
-    auto logger = getLogger("Main");
-    logger << "Starting the app";
-
+class LoggerOwner1 {
+    LoggerOwner1(Logger logger1, const Logger logger2, const Logger& logger3, Logger& logger4, Logger&& logger5)
+        : mLogger(logger1)
+        , mLoggerConst(logger2)
+        , mLoggerConstRef(logger3)
+        , mLoggerRef(logger4)
+        , mLoggerMoved(std::move(logger5))
     {
-        logger << "Creating test object";
-        TestRunner testRunner;
-        logger << "Leaving test object scope";
     }
 
-    logger(DEBUG) << "Threads joined";
+    void printMessage(const std::string& message) {
+        mLogger << message;
+        mLoggerConst << message;
+        mLoggerConstRef << message;
+        mLoggerRef << message;
+        mLoggerMoved << message;
+    }
 
-    logger << "Finishing the app";
+    void printMessage(Logger logger, const std::string& message) {
+        logger << message;
+    }
+
+    void printMessage(const Logger& logger, const std::string& message) {
+        logger << message;
+    }
+
+    void printMessage(Logger& logger, const std::string& message) {
+        logger << message;
+    }
+
+private:
+    Logger mLogger;
+    const Logger mLoggerConst;
+    const Logger& mLoggerConstRef;
+    Logger& mLoggerRef;
+    Logger mLoggerMoved;
+};
+
+void creationTest() {
+    {
+        auto logger = getLogger("Logger1");
+        logger << "1" << "2" << "3";
+    }
+    {
+        Logger logger2("Logger2");
+        logger2 << "4" << "5" << "6";
+    }
+    {
+        Logger logger3{ "Logger3" };
+        logger3 << "7" << "8" << "9";
+    }
+
+    {
+        auto logger = getLogger(std::string("Logger1"));
+        logger << "1" << "2" << "3";
+    }
+    {
+        Logger logger(std::string("Logger2"));
+        logger << "4" << "5" << "6";
+    }
+    {
+        Logger logger{ std::string("Logger3") };
+        logger << "7" << "8" << "9";
+    }
+    {
+        const char* logName = "logger4";
+        {
+            auto logger = getLogger(logName);
+            logger << "1" << "2" << "3";
+        }
+        {
+            Logger logger(logName);
+            logger << "4" << "5" << "6";
+        }
+        {
+            Logger logger{ logName };
+            logger << "7" << "8" << "9";
+        }
+    }
+    {
+        char logName[] = "logger5";
+        {
+            auto logger = getLogger(logName);
+            logger << "1" << "2" << "3";
+        }
+        {
+            Logger logger(logName);
+            logger << "4" << "5" << "6";
+        }
+        {
+            Logger logger{ logName };
+            logger << "7" << "8" << "9";
+        }
+    }
+    {
+        std::string name = "Logger6";
+        {
+            auto logger = getLogger(name);
+            logger << "1" << "2" << "3";
+        }
+        {
+            Logger logger(name);
+            logger << "4" << "5" << "6";
+        }
+        {
+            Logger logger{ name };
+            logger << "7" << "8" << "9";
+        }
+    }
+    {
+        const std::string name = "Logger7";
+        {
+            auto logger = getLogger(name);
+            logger << "1" << "2" << "3";
+        }
+        {
+            Logger logger(name);
+            logger << "4" << "5" << "6";
+        }
+        {
+            Logger logger{ name };
+            logger << "7" << "8" << "9";
+        }
+    }
+    {
+        std::string name = "Logger8";
+        {
+            auto logger = getLogger(std::move(name));
+            logger << "1" << "2" << "3";
+        }
+        name = "Logger9";
+        {
+            Logger logger(std::move(name));
+            logger << "4" << "5" << "6";
+        }
+        name = "Logger10";
+        {
+            Logger logger{ std::move(name) };
+            logger << "7" << "8" << "9";
+        }
+    }
+    {
+        auto logger = getLogger("Logger1");
+        auto logger2 = logger;
+        logger2 << "456";
+        logger << "123";
+    }
+    {
+        auto logger = getLogger("Logger1");
+        auto logger2(logger);
+        logger2 << "456";
+        logger << "123";
+    }
+    {
+        auto logger = getLogger("Logger1");
+        auto logger2 = std::move(logger);
+        logger2 << "456";
+        //logger << "123";
+    }
+    {
+        auto logger = getLogger("Logger1");
+        auto logger2(std::move(logger));
+        logger2 << "456";
+        //logger << "123";
+    }
+    {
+        const auto logger = getLogger("LoggerConst");
+        logger << "456";
+    }
+    {
+        auto logger = getLogger("LoggerRef");
+        auto& loggerRef = logger;
+        loggerRef << "456";
+        logger << "123";
+    }
+    {
+        const auto logger = getLogger("LoggerConstRef");
+        const auto& loggerRef = logger;
+        loggerRef << "456";
+        logger << "123";
+    }
+    {
+        auto logger = std::make_shared<Logger>("LoggerShared");
+        *logger << "123";
+        auto logger2 = logger;
+        *logger2 << "456";
+        *logger << "789";
+        auto logger3(std::move(logger));
+        *logger3 << "789";
+        *logger2 << "456";
+        std::weak_ptr<Logger> weak = logger3;
+        *weak.lock() << "10";
+    }
+    {
+        auto logger = std::make_unique<Logger>("LoggerUnique");
+        *logger << "123";
+        auto logger3(std::move(logger));
+        *logger3 << "789";
+    }
+}
+
+int main() {
+    //auto logger = getLogger("Main");
+    //logger << "Starting the app";
+
+    //{
+    //    logger << "Creating test object";
+    //    TestRunner testRunner;
+    //    logger << "Leaving test object scope";
+    //}
+
+    //logger(DEBUG) << "Threads joined";
+
+    //logger << "Finishing the app";
+
+    creationTest();
 
     return 0;
 }

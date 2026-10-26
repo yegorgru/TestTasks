@@ -6,7 +6,7 @@ Logger::Logger(const std::string& name)
 	: mName(name)
 { }
 
-LogMessage Logger::operator()(LogLevel logLevel) {
+LogMessage Logger::operator()(LogLevel logLevel) const {
 	return LogMessage(logLevel, mName);
 }
 

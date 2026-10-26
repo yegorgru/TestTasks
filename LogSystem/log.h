@@ -13,19 +13,24 @@ namespace LogSystem {
 class Logger {
 public:
 	Logger(const std::string& name);
+
+	Logger(const Logger&) = default;
+	Logger(Logger&&) = default;
+	Logger& operator=(const Logger&) = default;
+	Logger& operator=(Logger&&) = default;
 public:
-	LogMessage operator()(LogLevel logLevel);
+	LogMessage operator()(LogLevel logLevel) const;
 	template <typename T>
-	LogMessage operator<<(const T& message);
+	LogMessage operator<<(const T& message) const;
 private:
-	const std::string mName;
+	std::string mName;
 };
 
 Logger getLogger(const std::string& name = "");
 
 
 template <typename T>
-LogMessage Logger::operator<<(const T& message) {
+LogMessage Logger::operator<<(const T& message) const {
 	LogMessage logMessage(INFO, mName);
 	logMessage << message;
 	return logMessage;
